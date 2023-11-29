@@ -1,4 +1,3 @@
-
 from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
 from PyQt5.QtCore import Qt
 from board import Board
