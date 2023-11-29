@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, QBasicTimer, pyqtSignal, QPoint
 from PyQt5.QtGui import QPainter
 from piece import Piece
 
+
 class Board(QFrame):  # base the board on a QFrame widget
     updateTimerSignal = pyqtSignal(int)     # signal sent when timer is updated
     clickLocationSignal = pyqtSignal(str)   # signal sent when there is a new click location
