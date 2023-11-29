@@ -4,4 +4,3 @@ class Piece(object):
     White = 1
     Black = 2
 
-    Red=12
