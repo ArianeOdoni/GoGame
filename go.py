@@ -1,8 +1,15 @@
+from PyQt6.QtWidgets import QApplication, QMainWindow, QDockWidget, QSpacerItem, QGridLayout, QVBoxLayout
+from PyQt6.QtCore import Qt
 
-from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
-from PyQt5.QtCore import Qt
 from board import Board
 from score_board import ScoreBoard
+
+from PyQt6.QtWidgets import QApplication, QMainWindow, QDockWidget, QSpacerItem, QGridLayout, QVBoxLayout
+from PyQt6.QtCore import Qt
+
+from board import Board
+from score_board import ScoreBoard
+
 
 class Go(QMainWindow):
 
@@ -17,12 +24,13 @@ class Go(QMainWindow):
         return self.scoreBoard
 
     def initUI(self):
-        '''initiates application UI'''
+        '''Initiates application UI'''
         self.board = Board(self)
-        self.setCentralWidget(self.board)
-        self.scoreBoard = ScoreBoard()
-        self.addDockWidget(Qt.RightDockWidgetArea, self.scoreBoard)
-        self.scoreBoard.make_connection(self.board)
+        self.setCentralWidget(Board(self))
+
+        self.scoreBoard = ScoreBoard(self)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
+        #self.scoreBoard.make_connection(self.board)
 
         self.resize(800, 800)
         self.center()
@@ -30,7 +38,17 @@ class Go(QMainWindow):
         self.show()
 
     def center(self):
-        '''centers the window on the screen'''
-        screen = QDesktopWidget().screenGeometry()
+        '''Centers the window on the screen'''
+        screen = QApplication.primaryScreen().availableGeometry()
         size = self.geometry()
-        self.move((screen.width() - size.width()) / 2,(screen.height() - size.height()) / 2)
+        x = (screen.width() - size.width()) // 2
+        y = (screen.height() - size.height()) // 2
+        self.move(x, y)
+
+    def center(self):
+        '''Centers the window on the screen'''
+        screen = QApplication.primaryScreen().availableGeometry()
+        size = self.geometry()
+        x = (screen.width() - size.width()) // 2
+        y = (screen.height() - size.height()) // 2
+        self.move(x, y)
