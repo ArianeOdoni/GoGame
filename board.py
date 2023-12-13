@@ -1,12 +1,12 @@
 from PyQt6.QtWidgets import QFrame
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QPointF
-from PyQt6.QtGui import QPainter, QColor, QBrush, QPen, QRadialGradient, QLinearGradient, QPixmap
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QRectF, QPointF, QRect, QSize
+from PyQt6.QtGui import QPainter, QColor, QBrush, QPen, QPixmap, QImage
 
 from piece import Piece
 from game_logic import GameLogic
 
 
-class Board(QFrame):   # base the board on a QFrame widget
+class Board(QFrame):  # base the board on a QFrame widget
     updateTimerSignal = pyqtSignal(int)  # signal sent when the timer is updated
     clickLocationSignal = pyqtSignal(tuple)  # signal sent when there is a new click location
 
@@ -16,11 +16,11 @@ class Board(QFrame):   # base the board on a QFrame widget
     timerSpeed = 1000  # the timer updates every 1 second
     counter = 10  # the number the counter will count down from
     c = 0
+
     def __init__(self, parent):
         super().__init__(parent)
         self.initBoard()
         self.logic = GameLogic(self.boardArray)
-
 
     def initBoard(self):
         '''initiates board'''
@@ -29,12 +29,16 @@ class Board(QFrame):   # base the board on a QFrame widget
         self.isStarted = False  # game is not currently started
         self.start()  # start the game which will start the timer
 
+        # Set the background color of the QVBoxLayout
+        self.setStyleSheet("background-color: rgb(212, 177, 147);")
+
         self.connect_signal()
 
-        self.boardArray = [[Piece.NoPiece for _ in range(self.boardWidth)] for _ in range(self.boardHeight)]  # TODO - create a 2d int/Piece array to store the state of the game
-        self.printBoardArray()    # TODO - uncomment this method after creating the array above
+        self.boardArray = [[Piece.NoPiece for _ in range(self.boardWidth)] for _ in
+                           range(self.boardHeight)]  # TODO - create a 2d int/Piece array to store the state of the game
+        self.printBoardArray()  # TODO - uncomment this method after creating the array above
 
-        #self.setStyleSheet("QFrame { border: 10px solid red; }")
+        # self.setStyleSheet("QFrame { border: 10px solid red; }")
 
     def drawWoodGrainBackground(self, painter):
         # Load a wood texture image
@@ -61,32 +65,13 @@ class Board(QFrame):   # base the board on a QFrame widget
         col = round((pos[0] - width) / width)
         row = round((pos[1] - height) / height)
 
-        self.colRowToMousePos((row, col))
-
-        if self.c  %2 == 0:
-            print(self.logic.place_piece(row=row, column=col, color=Piece.Black))
-
-        else:
-            print(self.logic.place_piece(row=row, column=col, color=Piece.White))
-
-        self.c += 1
-
-        if self.c % 2 == 0:
-            print("Next piece: Black")
-        else:
-            print("Next piece: White")
-
-
-
-        #self.printBoardArray()
-
+        if not self.logic.place_piece(row, col, self.logic.get_current_player()):
+            print("La pièce n'a pas été placé. Suivante : ", self.logic.get_current_player())
 
     def colRowToMousePos(self, pos):
         '''convert a col and row position to a mouse position'''
         pos_x = pos[0] * self.squareWidth()
         pos_y = pos[1] * self.squareHeight()
-
-        #print(pos_x, pos_y)
 
     def squareWidth(self):
         '''returns the width of one square in the board'''
@@ -109,7 +94,7 @@ class Board(QFrame):   # base the board on a QFrame widget
         if Board.counter == 0:
             print("Game over")
         self.counter -= 1
-        #print('timerEvent()', self.counter)
+        # print('timerEvent()', self.counter)
         self.updateTimerSignal.emit(self.counter)
 
     def paintEvent(self, event):
@@ -117,6 +102,7 @@ class Board(QFrame):   # base the board on a QFrame widget
         painter = QPainter(self)
 
         self.drawWoodGrainBackground(painter)
+
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
         self.update()
@@ -124,14 +110,14 @@ class Board(QFrame):   # base the board on a QFrame widget
     def mousePressEvent(self, event):
         '''this event is automatically called when the mouse is pressed'''
         clickLoc = (event.pos().x(), event.pos().y())  # the location where a mouse click was registered
-       # print("mousePressEvent() - " + str(clickLoc))
+        print("mousePressEvent() - " + str(clickLoc))
+        print(self.squareWidth())
         # TODO you could call some game logic here
         self.clickLocationSignal.emit(clickLoc)
 
     def resetGame(self):
         '''clears pieces from the board'''
         # TODO write code to reset game
-        print("reset")
 
     def tryMove(self, newX, newY):
         '''tries to move a piece'''
@@ -146,75 +132,96 @@ class Board(QFrame):   # base the board on a QFrame widget
                 painter.save()
                 painter.translate(col * squareWidth + squareWidth, row * squareHeight + squareHeight)
                 painter.setBrush(QBrush(QColor(212, 177, 147)))  # Set brush color
-                #painter.setBrush(QBrush(QColor(255, 255, 255)))
                 painter.drawRect(0, 0, int(squareWidth), int(squareHeight))  # Draw rectangles
                 painter.restore()
 
+
+    # original one
     def drawPieces(self, painter):
         '''draw the pieces on the board'''
         for row in range(len(self.boardArray)):
             for col in range(len(self.boardArray[0])):
                 painter.save()
-                painter.translate(col * self.squareWidth() + self.squareWidth() / 2, row * self.squareHeight() + self.squareHeight() / 2)
+                painter.translate(col * self.squareWidth() + self.squareWidth() / 2,
+                                  row * self.squareHeight() + self.squareHeight() / 2)
                 radius = (min(self.squareWidth(), self.squareHeight()) - 2) / 2
                 center = QPoint(int(self.squareWidth() / 2), int(self.squareHeight() / 2))
 
-                '''
                 if self.boardArray[row][col] == Piece.Black:
                     # Draw a filled black circle for a black piece
 
                     painter.setBrush(QColor(0, 0, 0))  # Black color
                     painter.drawEllipse(center, int(radius), int(radius))
 
+
+
+
                 elif self.boardArray[row][col] == Piece.White:
                     # Draw an outlined black ellipse for a white piece
 
                     painter.setBrush(Qt.BrushStyle.NoBrush)  # No fill
                     painter.setPen(QPen(QColor(0, 0, 0), 2))  # Black outline
-                    painter.drawEllipse(center, int(radius), int(radius))'''
-                # Change the type of center from QPoint to QPointF
-                center = QPointF(self.squareWidth() / 2, self.squareHeight() / 2)
+                    painter.drawEllipse(center, int(radius), int(radius))
+
+                painter.restore()
+
+    def drawPieces3(self, painter):
+        '''draw the pieces on the board'''
+        for row in range(len(self.boardArray)):
+            for col in range(len(self.boardArray[0])):
+                painter.save()
+                painter.translate(col * self.squareWidth() + self.squareWidth() / 2,
+                                  row * self.squareHeight() + self.squareHeight() / 2)
+                radius = (min(self.squareWidth(), self.squareHeight()) - 2) / 2
+                center = QPoint(int(self.squareWidth() / 2), int(self.squareHeight() / 2))
+
+                square = min(self.squareWidth(), self.squareHeight()) - 2
+                target = QRect(center, QSize(int(square), int(square)))
 
                 if self.boardArray[row][col] == Piece.Black:
-                    # Draw a filled black circle for a black piece
-                    gradient = QRadialGradient(center, radius, center)
-                    gradient.setColorAt(0, QColor(0, 0, 0))
-                    gradient.setColorAt(1, QColor(50, 50, 50))  # Darker color for shading
-
-                    # Add a radial gradient for the highlight
-                    highlight_gradient = QRadialGradient(center, radius / 2, center)
-                    highlight_gradient.setColorAt(0, QColor(0,0, 0, 150))  # Adjust the alpha for transparency
-                    highlight_gradient.setColorAt(1, QColor(255, 255, 255, 0))
-
-                    # Combine the main gradient with the highlight gradient
-                    stops = gradient.stops() + highlight_gradient.stops()
-                    combined_gradient = QRadialGradient(center, radius, center)
-                    combined_gradient.setStops(stops)
-
-                    painter.setBrush(QBrush(combined_gradient))
-                    painter.setBrush(QBrush(gradient))
-                    painter.drawEllipse(center, int(radius), int(radius))
+                    # Draw a black image for a black piece
+                    black_pixmap = QPixmap("black_piece.png")
+                    painter.drawPixmap(target, black_pixmap, QRect(100, 100, 89, 89))
 
                 elif self.boardArray[row][col] == Piece.White:
+                    # Draw a white image for a white piece
+                    white_pixmap = QPixmap("./icon/white_piece.png")
+                    painter.drawPixmap(QPointF(center.x(), center.y()), white_pixmap)
 
-                    # Draw a filled white circle for a white piece
-                    gradient = QRadialGradient(center, radius, center)
-                    gradient.setColorAt(0, QColor(255, 255, 255))
-                    gradient.setColorAt(1, QColor(210, 210, 210))  # Lighter color for highlighting
+                painter.restore()
 
-                    # Add a radial gradient for the highlight
-                    highlight_gradient = QRadialGradient(center, radius / 2, center)
-                    highlight_gradient.setColorAt(0, QColor(255, 255, 255, 150))  # Adjust the alpha for transparency
-                    highlight_gradient.setColorAt(1, QColor(255, 255, 255, 0))
 
-                    # Combine the main gradient with the highlight gradient
-                    stops = gradient.stops() + highlight_gradient.stops()
-                    combined_gradient = QRadialGradient(center, radius, center)
-                    combined_gradient.setStops(stops)
 
-                    painter.setBrush(QBrush(combined_gradient))
+    def drawPieces4(self, painter):
+        '''draw the pieces on the board'''
+        for row in range(len(self.boardArray)):
+            for col in range(len(self.boardArray[0])):
+                painter.save()
 
-                    painter.setBrush(QBrush(gradient))
-                    painter.drawEllipse(center, int(radius), int(radius))
+                painter.translate(col * self.squareWidth() + self.squareWidth() / 2,
+                                 row * self.squareHeight() + self.squareHeight() / 2)
+
+
+                lenght = min(self.squareWidth(), self.squareHeight()) - 2
+
+                x_center = col * self.squareWidth() + self.squareWidth() / 2
+                y_center = row * self.squareHeight() + self.squareHeight() / 2
+
+                if self.boardArray[row][col] == Piece.Black:
+                    # Draw a black image for a black piece
+                    black_pixmap = QImage("./icon/black_piece.png")
+                    black_scaled_image = black_pixmap.scaled(int(lenght), int(lenght))
+
+                    x_top_left = x_center - black_scaled_image.width() / 2
+                    y_top_left = y_center - black_scaled_image.height() / 2
+
+
+                    painter.drawImage(int(0), int(0), black_scaled_image)
+
+
+                elif self.boardArray[row][col] == Piece.White:
+                    white_piece = QImage("./icon/white_piece.png")
+                    white_scaled_image = white_piece.scaled(int(lenght), int(lenght))
+                    painter.drawImage(0, 0, white_scaled_image)
 
                 painter.restore()
