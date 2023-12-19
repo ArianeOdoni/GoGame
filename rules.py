@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QPixmap, QBrush, QPainter
+from PyQt6.QtGui import QPixmap, QBrush, QPainter
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QStackedWidget, QWidget, QLabel, QHBoxLayout, \
     QScrollArea, QGridLayout
 from custom_button import CustomButton as button

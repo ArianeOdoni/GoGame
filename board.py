@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QFrame
+from PyQt6.QtWidgets import QFrame, QGraphicsDropShadowEffect, QGraphicsBlurEffect, QGraphicsEllipseItem
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QRectF, QPointF, QRect, QSize
-from PyQt6.QtGui import QPainter, QColor, QBrush, QPen, QPixmap, QImage
+from PyQt6.QtGui import QPainter, QColor, QBrush, QPen, QPixmap, QImage, QLinearGradient
 
 from piece import Piece
 from game_logic import GameLogic
@@ -104,7 +104,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.drawWoodGrainBackground(painter)
 
         self.drawBoardSquares(painter)
-        self.drawPieces(painter)
+        self.drawPieces2(painter)
         self.update()
 
     def mousePressEvent(self, event):
@@ -135,7 +135,6 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.drawRect(0, 0, int(squareWidth), int(squareHeight))  # Draw rectangles
                 painter.restore()
 
-
     # original one
     def drawPieces(self, painter):
         '''draw the pieces on the board'''
@@ -154,13 +153,57 @@ class Board(QFrame):  # base the board on a QFrame widget
                     painter.drawEllipse(center, int(radius), int(radius))
 
 
-
-
                 elif self.boardArray[row][col] == Piece.White:
                     # Draw an outlined black ellipse for a white piece
 
                     painter.setBrush(Qt.BrushStyle.NoBrush)  # No fill
                     painter.setPen(QPen(QColor(0, 0, 0), 2))  # Black outline
+                    painter.drawEllipse(center, int(radius), int(radius))
+
+                painter.restore()
+
+    def drawPieces2(self, painter):
+        '''draw the pieces on the board'''
+        for row in range(len(self.boardArray)):
+            for col in range(len(self.boardArray[0])):
+                painter.save()
+                painter.translate(col * self.squareWidth() + self.squareWidth() / 2,
+                                  row * self.squareHeight() + self.squareHeight() / 2)
+                radius = (min(self.squareWidth(), self.squareHeight()) - 2) / 2
+                center = QPoint(int(self.squareWidth() / 2), int(self.squareHeight() / 2))
+
+                if self.boardArray[row][col] == Piece.Black:
+                    # Draw a filled black circle for a black piece
+                    painter.setBrush(QColor(0, 0, 0))  # Black color
+                    painter.drawEllipse(center, int(radius), int(radius))
+
+                    # Add reflection effect
+                    gradient = QLinearGradient(center.x(), center.y() - radius,
+                                               center.x(), center.y() + radius)
+                    gradient.setColorAt(0, QColor(255, 255, 255, 100))
+                    gradient.setColorAt(0.5, QColor(255, 255, 255, 30))
+                    gradient.setColorAt(1, QColor(255, 255, 255, 0))
+
+                    painter.setBrush(gradient)
+                    painter.setPen(Qt.PenStyle.NoPen)  # Corrected here
+                    painter.drawEllipse(center, int(radius), int(radius))
+
+                elif self.boardArray[row][col] == Piece.White:
+                    # Draw an outlined white ellipse for a white piece
+                    painter.setBrush(QColor(240, 240, 240))  # White fill
+                    painter.setPen(QPen(QColor(240, 240, 240), 2))  # White outline
+                    painter.drawEllipse(center, int(radius), int(radius))
+
+                    # Add reflection effect
+                    gradient = QLinearGradient(center.x(), center.y() - radius,
+                                               center.x(), center.y() + radius)
+
+                    gradient.setColorAt(1, QColor(150, 150, 150, 150))  # Light gray with higher opacity
+                    gradient.setColorAt(0.5, QColor(200, 200, 200, 80))  # Light gray with medium opacity
+                    gradient.setColorAt(0, QColor(255, 255, 255, 0))  # Fully transparent
+
+                    painter.setBrush(gradient)
+                    painter.setPen(Qt.PenStyle.NoPen)
                     painter.drawEllipse(center, int(radius), int(radius))
 
                 painter.restore()
@@ -190,8 +233,6 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 painter.restore()
 
-
-
     def drawPieces4(self, painter):
         '''draw the pieces on the board'''
         for row in range(len(self.boardArray)):
@@ -199,8 +240,7 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.save()
 
                 painter.translate(col * self.squareWidth() + self.squareWidth() / 2,
-                                 row * self.squareHeight() + self.squareHeight() / 2)
-
+                                  row * self.squareHeight() + self.squareHeight() / 2)
 
                 lenght = min(self.squareWidth(), self.squareHeight()) - 2
 
@@ -214,7 +254,6 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                     x_top_left = x_center - black_scaled_image.width() / 2
                     y_top_left = y_center - black_scaled_image.height() / 2
-
 
                     painter.drawImage(int(0), int(0), black_scaled_image)
 
