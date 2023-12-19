@@ -1,4 +1,10 @@
+from PyQt6.QtWidgets import QMessageBox
+
+from confirmationWindow import Confirm
+from endGame import EndGame
 from piece import Piece
+from PyQt6.QtCore import QObject, pyqtSignal
+from score_board import ScoreBoard
 
 
 def have_same_element(array1, array2):
@@ -26,10 +32,12 @@ def print_board_array(board, txt):
     print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in board]))
 
 
-class GameLogic:
+class GameLogic(QObject):
     print("Game Logic Object Created")
-
+    blackCapturedChanged = pyqtSignal(int)
+    whiteCapturedChanged = pyqtSignal(int)
     def __init__(self, board):
+        super().__init__()
         self.taille = 9
         self.plateau = board
         self.previous_boards = []
@@ -40,6 +48,20 @@ class GameLogic:
         self.blackCaptured = 0
         self.blackTerritory = 0
         self.whiteTerritory = 0
+        self.scoreBoard = ScoreBoard()
+
+    '''getters'''
+    def getBlackCaptured(self):
+        return self.blackCaptured
+
+    def getWhiteCaptured(self):
+        return self.whiteCaptured
+
+    def getBlackTerritory(self):
+        return self.blackTerritory
+
+    def getWhiteTerritory(self):
+        return self.whiteTerritory
 
     def add_to_group(self, group):
         """Add a group of coordinates to the list of all groups"""
@@ -209,9 +231,14 @@ class GameLogic:
                     self.blackCaptured += 1
                 if color == 2:
                     self.whiteCaptured += 1
-        print("black captured: " + str(self.blackCaptured))
-        print("white captured: " + str(self.whiteCaptured))
+        print("black have captured: " + str(self.whiteCaptured))
+        print("white have captured: " + str(self.blackCaptured))
+
+        '''update score board label'''
+        self.scoreBoard.update_lbl_black_captured(self.whiteCaptured)
+        self.scoreBoard.update_lbl_white_captured(self.blackCaptured)
         self.groups.remove(group)
+
 
     def simulate(self, row, column, color):
         """Suicide rules"""
@@ -296,7 +323,6 @@ class GameLogic:
         return self.current_player
 
     def next_player(self):
-
         self.current_player = 3 - self.current_player
         if self.current_player % 2 == 0:
             print("Next piece: Black")
@@ -305,9 +331,7 @@ class GameLogic:
 
 
     def calculate_score(self):
-        self.countTerritory()
-        #self.count_territories_on_board()
-
+        #self.countTerritory()
         # Calculate the final scores
         black_score = self.blackTerritory + self.blackCaptured
         white_score = self.whiteTerritory + self.whiteCaptured
@@ -318,12 +342,24 @@ class GameLogic:
 
         if resign == True:
             # TODO : open a confirmation window
-            print("resign")
-            pass
+            confirm_dialog = Confirm()
+            result = confirm_dialog.exec()
 
-        # TODO : calculate the score
-        black_score, white_score = self.calculate_score()
-        print("Black score : " + str(black_score))
-        print("White score :" + str(white_score))
+            if result == QMessageBox.StandardButton.Yes:
 
-        # TODO : fenetre de fin
+                black_score, white_score = self.calculate_score()
+                print("Black score : " + str(black_score))
+                print("White score :" + str(white_score))
+
+                # TODO : cacher le plateau
+                endWind = EndGame(black_score,white_score)
+
+            else:
+                print("continue to play")
+        else:
+            black_score, white_score = self.calculate_score()
+            print("Black score : " + str(black_score))
+            print("White score :" + str(white_score))
+
+            # TODO : cacher le plateau
+            endWind = EndGame(black_score, white_score)

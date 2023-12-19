@@ -2,7 +2,6 @@ from PyQt6.QtGui import QPixmap, QBrush, QPainter, QFont
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import QLabel, QPushButton, QMainWindow, QWidget, QVBoxLayout
 from go import Go
-from menu import Menu
 from custom_button import CustomButton as button
 
 
@@ -19,10 +18,11 @@ class Start(QMainWindow):
         layout = QVBoxLayout()
 
         lbl_title = QLabel("Go Game", self)
+        self.setGeometry(200, 200, 800, 600)
 
         # resize the text size
         font = QFont()
-        font.setPointSize(20)
+        font.setPointSize(50)
         lbl_title.setFont(font)
 
         # create a label that show the picture
@@ -30,7 +30,7 @@ class Start(QMainWindow):
         lbl_picture.setPixmap(QPixmap("./icon/goPict.jpeg"))
 
         btn = button('Click to launch game !', "rgb(212, 177, 147)")
-        btn.setFixedSize(200,35)
+        btn.setFixedSize(200,80)
 
         lbl_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_picture.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -40,7 +40,7 @@ class Start(QMainWindow):
         layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
         #btn.clicked.connect(self.launchGame)
-        btn.clicked.connect(self.launchMenu)
+        btn.clicked.connect(self.launchRules)
 
         central_widget.setLayout(layout)
         self.setWindowTitle('Start Game')
@@ -61,13 +61,9 @@ class Start(QMainWindow):
         self.drawWoodGrainBackground(painter)
         self.update()
 
-    def launchMenu(self):
+    def launchRules(self):
         self.hide()
         if not self.go_window:
-            self.go_window = Menu()
+            self.go_window = Go()
 
         self.go_window.show()
-    def launchGame(self):
-        myGo = Go()
-        myGo.show()
-        self.hide()
