@@ -10,6 +10,8 @@ class Board(QFrame):  # base the board on a QFrame widget
     updateTimerSignal = pyqtSignal(int)  # signal sent when the timer is updated
     clickLocationSignal = pyqtSignal(tuple)  # signal sent when there is a new click location
 
+    mousePosition = None
+
     boardWidth = 9
     boardHeight = 9  #
     timerSpeed = 1000  # the timer updates every 1 second
@@ -21,6 +23,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         super().__init__(parent)
         self.initBoard()
         self.logic = GameLogic(self.boardArray)
+        self.setMouseTracking(True)
 
     def initBoard(self):
         '''initiates board'''
@@ -32,7 +35,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         # Set the background color of the QVBoxLayout
         self.setStyleSheet("background-color: rgb(212, 177, 147);")
 
-        self.connect_signal()
+
 
         self.boardArray = [[Piece.NoPiece for _ in range(self.boardWidth)] for _ in
                            range(self.boardHeight)]  # TODO - create a 2d int/Piece array to store the state of the game
@@ -46,8 +49,6 @@ class Board(QFrame):  # base the board on a QFrame widget
         brush = QBrush(wood_texture)
         painter.fillRect(self.rect(), brush)
 
-    def connect_signal(self):
-        self.clickLocationSignal.connect(self.mousePosToColRow)
 
     def printBoardArray(self):
         '''prints the boardArray in an attractive way'''
@@ -63,13 +64,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         col = round((pos[0] - width) / width)
         row = round((pos[1] - height) / height)
 
-        if self.replay_mode:
-            return
+        return row, col
 
-        if not self.logic.place_piece(row, col, self.logic.get_current_player()):
-            print("Piece not placed. Next : ", self.logic.get_current_player())
-        else:
-            print("Piece placed !")
 
     def colRowToMousePos(self, pos):
         '''convert a col and row position to a mouse position'''
@@ -108,6 +104,14 @@ class Board(QFrame):  # base the board on a QFrame widget
 
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
+
+        self.drawPiecePreview(painter, self.mousePosition)
+
+        self.update()
+
+    def mouseMoveEvent(self, event):
+        self.mousePosition = (event.pos().x(), event.pos().y())
+        print("mooved")
         self.update()
 
     def mousePressEvent(self, event):
@@ -115,16 +119,28 @@ class Board(QFrame):  # base the board on a QFrame widget
         clickLoc = (event.pos().x(), event.pos().y())  # the location where a mouse click was registered
         print("mousePressEvent() - " + str(clickLoc))
         print(self.squareWidth())
-        # TODO you could call some game logic here
+
+        self.place(clickLoc)
+
         self.clickLocationSignal.emit(clickLoc)
 
     def resetGame(self):
         '''clears pieces from the board'''
         # TODO write code to reset game
 
-    def tryMove(self, newX, newY):
-        '''tries to move a piece'''
-        pass  # Implement this method according to your logic
+    def place(self, pos):
+        """Place a piece if possible"""
+
+        row, col = self.mousePosToColRow(pos)
+
+        if self.replay_mode:
+            return
+
+        if not self.logic.place_piece(row, col, self.logic.get_current_player()):
+            print("Piece not placed. Next : ", self.logic.get_current_player())
+        else:
+            print("Piece placed !")
+
 
     def drawBoardSquares(self, painter):
         '''draw all the square on the board'''
@@ -144,35 +160,6 @@ class Board(QFrame):  # base the board on a QFrame widget
                     painter.setBrush(QBrush(QColor(0, 0, 0)))  # dots in black
                     corner_radius = 5  # Adjust the radius as needed
                     painter.drawEllipse(QPointF(0, 0), corner_radius, corner_radius)
-                painter.restore()
-
-    # original one
-    def drawPieces2(self, painter):
-        '''draw the pieces on the board'''
-        for row in range(len(self.boardArray)):
-            for col in range(len(self.boardArray[0])):
-                painter.save()
-                painter.translate(col * self.squareWidth() + self.squareWidth() / 2,
-                                  row * self.squareHeight() + self.squareHeight() / 2)
-                radius = (min(self.squareWidth(), self.squareHeight()) - 2) / 2
-                center = QPoint(int(self.squareWidth() / 2), int(self.squareHeight() / 2))
-
-                if self.boardArray[row][col] == Piece.Black:
-                    # Draw a filled black circle for a black piece
-
-                    painter.setBrush(QColor(0, 0, 0))  # Black color
-                    painter.drawEllipse(center, int(radius), int(radius))
-
-
-
-
-                elif self.boardArray[row][col] == Piece.White:
-                    # Draw an outlined black ellipse for a white piece
-
-                    painter.setBrush(Qt.BrushStyle.NoBrush)  # No fill
-                    painter.setPen(QPen(QColor(0, 0, 0), 2))  # Black outline
-                    painter.drawEllipse(center, int(radius), int(radius))
-
                 painter.restore()
 
     def drawPieces(self, painter):
@@ -220,6 +207,62 @@ class Board(QFrame):  # base the board on a QFrame widget
                     painter.drawEllipse(center, int(radius), int(radius))
 
                 painter.restore()
+
+    def drawPiecePreview(self, painter, pos):
+
+        if self.replay_mode:
+            return
+
+        row, col = 0, 0
+
+        if pos is not None:
+            row, col = self.mousePosToColRow(pos)
+        painter.save()
+
+        painter.translate(col * self.squareWidth() + self.squareWidth() / 2,
+                          row * self.squareHeight() + self.squareHeight() / 2)
+        radius = (min(self.squareWidth(), self.squareHeight()) - 2) / 2
+        center = QPoint(int(self.squareWidth() / 2), int(self.squareHeight() / 2))
+
+        if not self.logic.valid_position(row, col):
+            return
+
+        if self.boardArray[row][col] != Piece.NoPiece:
+            return
+
+        if self.logic.current_player == Piece.Black:
+            # Draw a filled black circle for a black piece
+            painter.setBrush(QColor(0, 0, 0, 120))  # Black color
+            painter.drawEllipse(center, int(radius), int(radius))
+
+            # Add reflection effect
+            gradient = QLinearGradient(center.x(), center.y() - radius,
+                                       center.x(), center.y() + radius)
+            gradient.setColorAt(0, QColor(255, 255, 255, 100))
+            gradient.setColorAt(0.5, QColor(255, 255, 255, 30))
+            gradient.setColorAt(1, QColor(255, 255, 255, 0))
+
+            painter.setBrush(gradient)
+            painter.setPen(Qt.PenStyle.NoPen)  # Corrected here
+            painter.drawEllipse(center, int(radius), int(radius))
+
+        elif self.logic.current_player == Piece.White:
+            # Draw an outlined white ellipse for a white piece
+            painter.setBrush(QColor(240, 240, 240, 120))  # White fill
+            painter.setPen(QPen(QColor(240, 240, 240), 2))  # White outline
+            painter.drawEllipse(center, int(radius), int(radius))
+
+            # Add reflection effect
+            gradient = QLinearGradient(center.x(), center.y() - radius,
+                                       center.x(), center.y() + radius)
+
+            gradient.setColorAt(1, QColor(150, 150, 150, 150))  # Light gray with higher opacity
+            gradient.setColorAt(0.5, QColor(200, 200, 200, 80))  # Light gray with medium opacity
+            gradient.setColorAt(0, QColor(255, 255, 255, 0))  # Fully transparent
+
+            painter.setBrush(gradient)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawEllipse(center, int(radius), int(radius))
 
     """---Replay mode bellow---"""
 

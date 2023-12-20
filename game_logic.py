@@ -2,8 +2,8 @@ from PyQt6.QtWidgets import QMessageBox
 from confirmationWindow import Confirm
 from piece import Piece
 from PyQt6.QtCore import QObject, pyqtSignal
-from score_board import ScoreBoard
 from endGame import EndGame
+
 
 def have_same_element(array1, array2):
     """Return True if the two array have the same element"""
@@ -11,6 +11,7 @@ def have_same_element(array1, array2):
     sorted_array2 = sorted(array2)
 
     return all(a == b for a, b in zip(sorted_array1, sorted_array2))
+
 
 def is_same_board(board1, board2):
     if len(board1) != len(board2):
@@ -21,6 +22,7 @@ def is_same_board(board1, board2):
             if board1[i][j] != board2[i][j]:
                 return False
     return True
+
 
 def print_board_array(board, txt):
     """prints the boardArray in an attractive way"""
@@ -395,8 +397,6 @@ class GameLogic(QObject):
             else:
                 self.noReplayGame.emit()
 
-
-
     def calculate_territory(self, board=None):
         if board is None:
             board = self.plateau
@@ -422,5 +422,4 @@ class GameLogic(QObject):
         for position in group:
             liberty += len(
                 [e for e in self.get_surrounding_piece(position[0], position[1], board) if e not in [-1, color]])
-
         return liberty

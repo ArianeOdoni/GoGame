@@ -36,7 +36,6 @@ class Rules(QDialog):
         # Create a Satcked to have all the page at the same place
         self.stacked_widget = QStackedWidget(self)
 
-        # Créer les pages et les ajouter au widget empilable
         self.pages = []
         for i in range(6):
             page = QWidget(self)

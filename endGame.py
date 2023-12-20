@@ -69,3 +69,4 @@ class EndGame(QDialog):
     def replay_clicked(self):
         self.end_wind.close()
         self.replay = True
+
