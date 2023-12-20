@@ -1,12 +1,9 @@
 from PyQt6.QtWidgets import QMessageBox
-
 from confirmationWindow import Confirm
-
 from piece import Piece
 from PyQt6.QtCore import QObject, pyqtSignal
 from score_board import ScoreBoard
 from endGame import EndGame
-
 
 def have_same_element(array1, array2):
     """Return True if the two array have the same element"""
@@ -14,7 +11,6 @@ def have_same_element(array1, array2):
     sorted_array2 = sorted(array2)
 
     return all(a == b for a, b in zip(sorted_array1, sorted_array2))
-
 
 def is_same_board(board1, board2):
     if len(board1) != len(board2):
@@ -26,7 +22,6 @@ def is_same_board(board1, board2):
                 return False
     return True
 
-
 def print_board_array(board, txt):
     """prints the boardArray in an attractive way"""
     print(txt)
@@ -35,42 +30,33 @@ def print_board_array(board, txt):
 
 class GameLogic(QObject):
     print("Game Logic Object Created")
-    blackCapturedChanged = pyqtSignal(int)
-    whiteCapturedChanged = pyqtSignal(int)
+
+    calculateTerritory = pyqtSignal()
+    replayGame = pyqtSignal()
+    noReplayGame = pyqtSignal()
 
     def __init__(self, board):
         super().__init__()
-        self.end_game_dialog = None
         self.taille = 9
         self.plateau = board
-        self.previous_boards = []
+        self.previous_boards = [[board]]
         self.groups = None
         self.pass_turn = False
         self.current_player = 2
-        self.whiteCaptured = 0
-        self.blackCaptured = 0
-        self.blackTerritory = 0
-        self.whiteTerritory = 0
-        self.scoreBoard = ScoreBoard()
+        self.black_territory = 0
+        self.white_territory = 0
+        self.black_captured = 0
+        self.white_captured = 0
 
-    '''getters'''
-
-    def getBlackCaptured(self):
-        return self.blackCaptured
-
-    def getWhiteCaptured(self):
-        return self.whiteCaptured
-
-    def getBlackTerritory(self):
-        return self.blackTerritory
-
-    def getWhiteTerritory(self):
-        return self.whiteTerritory
+        self.black_territorys = [0]
+        self.white_territorys = [0]
+        self.blacks_captured = [0]
+        self.whites_captured = [0]
 
     def add_to_group(self, group):
         """Add a group of coordinates to the list of all groups"""
 
-        if group == []:
+        if not group:
             return
 
         if self.groups is None:
@@ -89,6 +75,9 @@ class GameLogic(QObject):
     def check_liberty_for_group(self, group, board=None):
         """Return False if at least one piece as 1 liberty degree or more"""
 
+        if board[group[0][0]][group[0][1]] == Piece.NoPiece:
+            return False
+
         if board is None:
             board = self.plateau
 
@@ -98,6 +87,27 @@ class GameLogic(QObject):
                 return False
 
         return True
+
+    def check_liberty_for_empty_group(self, group, board=None):
+        if board is None:
+            board = self.plateau
+
+        if board[group[0][0]][group[0][1]] != Piece.NoPiece:
+            return False
+
+        surroundingPiece = []
+
+        for position in group:
+            surroundingPiece += self.get_surrounding_piece(position[0], position[1], board)
+
+        surroundingPiece = [e for e in surroundingPiece if e in [1, 2]]
+
+        if all(e == surroundingPiece[0] for e in surroundingPiece) and len(surroundingPiece) >= len(group):
+
+            if surroundingPiece[0] == Piece.Black:
+                self.black_territory += len(group)
+            elif surroundingPiece[0] == Piece.White:
+                self.white_territory += len(group)
 
     def valid_position(self, row, column):
         '''Check if the position is on the board'''
@@ -123,6 +133,12 @@ class GameLogic(QObject):
 
         # Reset the pass cycle
         self.pass_turn = False
+
+        # Calculate the new territory
+        self.calculate_territory()
+
+        # Update our array
+        self.update_array(self.black_territory, self.white_territory, self.black_captured, self.white_captured)
 
         # Change the current player
         self.next_player()
@@ -202,10 +218,6 @@ class GameLogic(QObject):
             if self.valid_position(row, column):
                 color = board[row][column]
 
-        # We don't want to make group of empty places, so we return an empty array if there is no piece here
-        if color == Piece.NoPiece:
-            return []
-
         # If we are not already visited this piece, we can add it to the group
         if (row, column) not in visited:
             visited.append((row, column))
@@ -223,25 +235,24 @@ class GameLogic(QObject):
 
         return group
 
-    def delete_group(self, group, color, board=None):
+    def delete_group(self, group, board=None):
         """Delete a group of pieces from the board"""
         if board is None:
             board = self.plateau
 
         for piece in group:
-            if self.valid_position(piece[0], piece[1]):
-                board[piece[0]][piece[1]] = Piece.NoPiece
-                if color == 1:
-                    self.blackCaptured += 1
-                if color == 2:
-                    self.whiteCaptured += 1
-        print("black have captured: " + str(self.whiteCaptured))
-        print("white have captured: " + str(self.blackCaptured))
 
-        '''update score board label'''
-        self.scoreBoard.update_lbl_black_captured(self.whiteCaptured)
-        self.scoreBoard.update_lbl_white_captured(self.blackCaptured)
-        self.groups.remove(group)
+            if self.valid_position(piece[0], piece[1]):
+
+                color = board[piece[0]][piece[1]]
+
+                board[piece[0]][piece[1]] = Piece.NoPiece
+                if color == Piece.Black:
+                    self.black_captured += 1
+                if color == Piece.White:
+                    self.white_captured += 1
+
+        # self.groups.remove(group)
 
     def simulate(self, row, column, color):
         """Suicide rules"""
@@ -273,22 +284,35 @@ class GameLogic(QObject):
                     for e in group:
                         last_tro_try.append(e)
 
+        last_white_captured = self.white_captured
+        last_black_captured = self.black_captured
+
         # Check if a group is surrounded and delete it if it's
         for g in self.groups:
 
             if not have_same_element(g, last_tro_try):
                 if self.check_liberty_for_group(g, copied_board):
-                    self.delete_group(g, color, copied_board)
+                    self.delete_group(g, copied_board)
 
         if self.check_liberty_for_group(last_tro_try, copied_board):
-            self.delete_group(last_tro_try, 0, copied_board)
+            self.delete_group(last_tro_try, copied_board)
+
+        print(last_tro_try, "min : ", self.min_needed_piece_for_surrounding(last_tro_try, copied_board))
 
         number_after_simulation = self.get_number_of(color, copied_board)
 
         if number_before_simulation > number_after_simulation:  # suicide rules
+            self.white_captured = last_white_captured
+            self.black_captured = last_black_captured
             return False
 
         return copied_board
+
+    def update_array(self, black_ter, white_ter, black_capt, white_capt):
+        self.blacks_captured.append(black_capt)
+        self.whites_captured.append(white_capt)
+        self.black_territorys.append(black_ter)
+        self.white_territorys.append(white_ter)
 
     def get_number_of(self, color, board=None):
         """Get the number of a color in a board"""
@@ -316,7 +340,13 @@ class GameLogic(QObject):
 
     def pass_this_turn(self):
 
-        if self.pass_turn == True:
+        confirm_dialog = Confirm("Do you really want to skip your turn ?")
+        result = confirm_dialog.exec()
+
+        if result != QMessageBox.StandardButton.Yes:
+            return
+
+        if self.pass_turn:
             self.end_of_the_game()
         else:
             self.next_player()
@@ -326,25 +356,23 @@ class GameLogic(QObject):
         return self.current_player
 
     def next_player(self):
+
         self.current_player = 3 - self.current_player
-        if self.current_player % 2== 0:
+        if self.current_player % 2 == 0:
             print("Next piece: Black")
         else:
             print("Next piece: White")
 
     def calculate_score(self):
-        # self.countTerritory()
+
         # Calculate the final scores
-        black_score = self.blackTerritory + self.blackCaptured
-        white_score = self.whiteTerritory + self.whiteCaptured
+        black_score = self.black_territory + self.white_captured
+        white_score = self.white_territory + self.black_captured
         return black_score, white_score
 
     def end_of_the_game(self, resign=False):
-        print("end of the game")
-
         if resign == True:
-            # TODO : open a confirmation window
-            confirm_dialog = Confirm()
+            confirm_dialog = Confirm("Do you really want to stop the game ?")
             result = confirm_dialog.exec()
 
             if result == QMessageBox.StandardButton.Yes:
@@ -353,17 +381,46 @@ class GameLogic(QObject):
                 print("Black score : " + str(black_score))
                 print("White score :" + str(white_score))
 
-                # TODO : cacher le plateau
-                self.endWind = EndGame(black_score, white_score)
-                self.endWind.exec()
-
-            else:
-                print("continue to play")
+                endWind = EndGame(black_score, white_score)
+                if endWind.replay:
+                    self.replayGame.emit()
+                else:
+                    self.noReplayGame.emit()
         else:
             black_score, white_score = self.calculate_score()
-            print("Black score : " + str(black_score))
-            print("White score :" + str(white_score))
 
-            # TODO : cacher le plateau
-            self.end_game_dialog = EndGame(black_score, white_score)
-            self.end_game_dialog.exec()
+            endWind = EndGame(black_score, white_score)
+            if endWind.replay:
+                self.replayGame.emit()
+            else:
+                self.noReplayGame.emit()
+
+
+
+    def calculate_territory(self, board=None):
+        if board is None:
+            board = self.plateau
+
+        self.black_territory = 0
+        self.white_territory = 0
+
+        for group in self.groups:
+            if board[group[0][0]][group[0][1]] == Piece.NoPiece:
+                self.check_liberty_for_empty_group(group, board)
+
+        self.calculateTerritory.emit()
+        pass
+
+    def min_needed_piece_for_surrounding(self, group, board=None):
+
+        if board is None:
+            board = self.plateau
+
+        color = board[group[0][0]][group[0][1]]
+        liberty = 0
+
+        for position in group:
+            liberty += len(
+                [e for e in self.get_surrounding_piece(position[0], position[1], board) if e not in [-1, color]])
+
+        return liberty

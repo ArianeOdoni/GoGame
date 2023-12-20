@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap, QBrush, QPainter
+from PyQt6.QtGui import QPixmap, QBrush, QPainter, QIcon
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QStackedWidget, QWidget, QLabel, QHBoxLayout, \
     QScrollArea, QGridLayout
 from custom_button import CustomButton as button
@@ -18,6 +18,7 @@ class Rules(QDialog):
     def initUI(self):
         self.setWindowTitle('Menu')
         self.setGeometry(200, 200, 800, 600)
+        self.setWindowIcon(QIcon("./icon/goo.png"))
 
         # QDialog Layout
         main_layout = QVBoxLayout(self)
@@ -467,4 +468,3 @@ class Rules(QDialog):
 
     def returnToGame(self):
         self.hide()
-

@@ -1,14 +1,16 @@
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMessageBox
 
 
 class Confirm(QMessageBox):
-    def __init__(self):
+    def __init__(self, txt):
         super().__init__()
-        self.initUI()
+        self.initUI(txt)
 
-    def initUI(self):
+    def initUI(self, txt):
         self.setWindowTitle('Confirmation')
-        self.setText("Do you really want to stop the game?")
+        self.setWindowIcon(QIcon("./icon/goo.png"))
+        self.setText(txt)
         self.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         self.setDefaultButton(QMessageBox.StandardButton.No)

@@ -1,6 +1,6 @@
-from PyQt6.QtGui import QPixmap, QBrush, QPainter, QFont
+from PyQt6.QtGui import QPixmap, QBrush, QPainter, QFont, QIcon
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtWidgets import QLabel, QPushButton, QMainWindow, QWidget, QVBoxLayout
+from PyQt6.QtWidgets import QLabel, QPushButton, QMainWindow, QWidget, QVBoxLayout, QApplication
 from go import Go
 from custom_button import CustomButton as button
 
@@ -12,10 +12,9 @@ class Start(QMainWindow):
         self.initUI()
 
     def initUI(self):
-
-        self.go_window = None
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
+        self.setWindowIcon(QIcon("./icon/goo.png"))
 
         layout = QVBoxLayout()
 
@@ -42,13 +41,16 @@ class Start(QMainWindow):
         layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
         #btn.clicked.connect(self.launchGame)
-        btn.clicked.connect(self.launchRules)
+        btn.clicked.connect(self.launch)
+
+        #self.go.homeButtonClicked.connect(self.showWind)
 
         central_widget.setLayout(layout)
         self.setWindowTitle('Start Game')
+        self.center()
         self.show()
 
-    def drawWoodGrainBackground(self, painter):
+    def draw_wood_grain_background(self, painter):
         # Load a wood texture image
         wood_texture = QPixmap("./icon/woods.jpg")  # Replace with the path to your wood texture image
 
@@ -60,11 +62,23 @@ class Start(QMainWindow):
         '''paints the board and the pieces of the game'''
         painter = QPainter(self)
 
-        self.drawWoodGrainBackground(painter)
+        self.draw_wood_grain_background(painter)
         self.update()
 
-    def launchRules(self):
+    def launch(self):
         self.hide()
         if not self.go_window:
             self.go_window = Go()
+            self.go_window.homeButtonClicked.connect(self.showWind)
         self.go_window.show()
+
+    def showWind(self):
+        self.show()
+
+    def center(self):
+        '''Centers the window on the screen'''
+        screen = QApplication.primaryScreen().availableGeometry()
+        size = self.geometry()
+        x = (screen.width() - size.width()) // 2
+        y = (screen.height() - size.height()) // 2
+        self.move(x, y)

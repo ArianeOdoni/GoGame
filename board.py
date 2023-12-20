@@ -10,12 +10,12 @@ class Board(QFrame):  # base the board on a QFrame widget
     updateTimerSignal = pyqtSignal(int)  # signal sent when the timer is updated
     clickLocationSignal = pyqtSignal(tuple)  # signal sent when there is a new click location
 
-    # TODO set the board width and height to be square
-    boardWidth = 9  # board is 0 squares wide # TODO this needs updating
+    boardWidth = 9
     boardHeight = 9  #
     timerSpeed = 1000  # the timer updates every 1 second
     counter = 10  # the number the counter will count down from
     c = 0
+    replay_mode = False
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -38,11 +38,9 @@ class Board(QFrame):  # base the board on a QFrame widget
                            range(self.boardHeight)]  # TODO - create a 2d int/Piece array to store the state of the game
         self.printBoardArray()  # TODO - uncomment this method after creating the array above
 
-        # self.setStyleSheet("QFrame { border: 10px solid red; }")
-
     def drawWoodGrainBackground(self, painter):
         # Load a wood texture image
-        wood_texture = QPixmap("./icon/woods.jpg")  # Replace with the path to your wood texture image
+        wood_texture = QPixmap("./icon/woods.jpg")
 
         # Create a brush with the wood texture
         brush = QBrush(wood_texture)
@@ -65,8 +63,13 @@ class Board(QFrame):  # base the board on a QFrame widget
         col = round((pos[0] - width) / width)
         row = round((pos[1] - height) / height)
 
+        if self.replay_mode:
+            return
+
         if not self.logic.place_piece(row, col, self.logic.get_current_player()):
-            print("La pièce n'a pas été placé. Suivante : ", self.logic.get_current_player())
+            print("Piece not placed. Next : ", self.logic.get_current_player())
+        else:
+            print("Piece placed !")
 
     def colRowToMousePos(self, pos):
         '''convert a col and row position to a mouse position'''
@@ -104,7 +107,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.drawWoodGrainBackground(painter)
 
         self.drawBoardSquares(painter)
-        self.drawPieces2(painter)
+        self.drawPieces(painter)
         self.update()
 
     def mousePressEvent(self, event):
@@ -134,17 +137,17 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.setBrush(QBrush(QColor(212, 177, 147)))  # Set brush color
                 painter.drawRect(0, 0, int(squareWidth), int(squareHeight))  # Draw rectangles
 
-
                 '''dots'''
-                if (row == 2 and col == 2) or (row == 2 and col == 6) or (row == 4 and col == 4) or (row == 6 and col == 2) or (
-                                        row == 6 and col == 6):
+                if (row == 2 and col == 2) or (row == 2 and col == 6) or (row == 4 and col == 4) or (
+                        row == 6 and col == 2) or (
+                        row == 6 and col == 6):
                     painter.setBrush(QBrush(QColor(0, 0, 0)))  # dots in black
                     corner_radius = 5  # Adjust the radius as needed
                     painter.drawEllipse(QPointF(0, 0), corner_radius, corner_radius)
                 painter.restore()
 
     # original one
-    def drawPieces(self, painter):
+    def drawPieces2(self, painter):
         '''draw the pieces on the board'''
         for row in range(len(self.boardArray)):
             for col in range(len(self.boardArray[0])):
@@ -161,6 +164,8 @@ class Board(QFrame):  # base the board on a QFrame widget
                     painter.drawEllipse(center, int(radius), int(radius))
 
 
+
+
                 elif self.boardArray[row][col] == Piece.White:
                     # Draw an outlined black ellipse for a white piece
 
@@ -170,7 +175,7 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 painter.restore()
 
-    def drawPieces2(self, painter):
+    def drawPieces(self, painter):
         '''draw the pieces on the board'''
         for row in range(len(self.boardArray)):
             for col in range(len(self.boardArray[0])):
@@ -216,59 +221,11 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 painter.restore()
 
-    def drawPieces3(self, painter):
-        '''draw the pieces on the board'''
-        for row in range(len(self.boardArray)):
-            for col in range(len(self.boardArray[0])):
-                painter.save()
-                painter.translate(col * self.squareWidth() + self.squareWidth() / 2,
-                                  row * self.squareHeight() + self.squareHeight() / 2)
-                radius = (min(self.squareWidth(), self.squareHeight()) - 2) / 2
-                center = QPoint(int(self.squareWidth() / 2), int(self.squareHeight() / 2))
+    """---Replay mode bellow---"""
 
-                square = min(self.squareWidth(), self.squareHeight()) - 2
-                target = QRect(center, QSize(int(square), int(square)))
+    def set_board(self, index):
+        self.boardArray = self.logic.previous_boards[index]
+        self.update()
 
-                if self.boardArray[row][col] == Piece.Black:
-                    # Draw a black image for a black piece
-                    black_pixmap = QPixmap("black_piece.png")
-                    painter.drawPixmap(target, black_pixmap, QRect(100, 100, 89, 89))
-
-                elif self.boardArray[row][col] == Piece.White:
-                    # Draw a white image for a white piece
-                    white_pixmap = QPixmap("./icon/white_piece.png")
-                    painter.drawPixmap(QPointF(center.x(), center.y()), white_pixmap)
-
-                painter.restore()
-
-    def drawPieces4(self, painter):
-        '''draw the pieces on the board'''
-        for row in range(len(self.boardArray)):
-            for col in range(len(self.boardArray[0])):
-                painter.save()
-
-                painter.translate(col * self.squareWidth() + self.squareWidth() / 2,
-                                  row * self.squareHeight() + self.squareHeight() / 2)
-
-                lenght = min(self.squareWidth(), self.squareHeight()) - 2
-
-                x_center = col * self.squareWidth() + self.squareWidth() / 2
-                y_center = row * self.squareHeight() + self.squareHeight() / 2
-
-                if self.boardArray[row][col] == Piece.Black:
-                    # Draw a black image for a black piece
-                    black_pixmap = QImage("./icon/black_piece.png")
-                    black_scaled_image = black_pixmap.scaled(int(lenght), int(lenght))
-
-                    x_top_left = x_center - black_scaled_image.width() / 2
-                    y_top_left = y_center - black_scaled_image.height() / 2
-
-                    painter.drawImage(int(0), int(0), black_scaled_image)
-
-
-                elif self.boardArray[row][col] == Piece.White:
-                    white_piece = QImage("./icon/white_piece.png")
-                    white_scaled_image = white_piece.scaled(int(lenght), int(lenght))
-                    painter.drawImage(0, 0, white_scaled_image)
-
-                painter.restore()
+    def start_replay_mode(self):
+        self.replay_mode = True
