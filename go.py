@@ -47,8 +47,14 @@ class Go(QMainWindow):
         button_layout.addWidget(self.next)
 
         #add button
-        self.btnHome = button("Home")
-        self.btnRestart = button("Restart playing")
+        self.btnHome = button("")
+        icon = QIcon("./icon/home.png")
+        resizedIcon = icon.pixmap(45, 45)
+        self.btnHome.setIcon(QIcon(resizedIcon))
+        self.btnRestart = button("")
+        icon2 = QIcon("./icon/againb.png")
+        resizedIcon2 = icon2.pixmap(45, 45)
+        self.btnRestart.setIcon(QIcon(resizedIcon2))
 
         self.btnHome.hide()
         self.btnRestart.hide()
