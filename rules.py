@@ -25,7 +25,7 @@ class Rules(QDialog):
         self.setLayout(main_layout)
 
         top_layout = QHBoxLayout()
-        top_layout.addStretch()  # Espace extensible à gauche
+        top_layout.addStretch()
         passBtn = button('Return to the game', 'rgb(221,221,221)', 'rgb(0,0,0)')
         passBtn.setFixedSize(150, 25)
         top_layout.addWidget(passBtn)
@@ -33,8 +33,7 @@ class Rules(QDialog):
 
         passBtn.clicked.connect(self.returnToGame)
 
-        # Create a Satcked to have all the page at the same place
-        self.stacked_widget = QStackedWidget(self)
+        self.stacked_widget = QStackedWidget(self)#store all the page at the same place
 
         self.pages = []
         for i in range(6):

@@ -123,14 +123,11 @@ class Go(QMainWindow):
         self.slider.setMaximumWidth(new_slider_width)
 
     def home(self):
-        self.board = Board(self)
-        self.scoreBoard.close()
-        self.initUI()
+        self.restart()
         self.close()
         self.homeButtonClicked.emit()
 
     def restart(self):
-        self.board = Board(self)
         self.scoreBoard.hide()
         self.initUI()
 

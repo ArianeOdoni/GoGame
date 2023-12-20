@@ -111,7 +111,7 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def mouseMoveEvent(self, event):
         self.mousePosition = (event.pos().x(), event.pos().y())
-        print("mooved")
+        #print("mooved")
         self.update()
 
     def mousePressEvent(self, event):
