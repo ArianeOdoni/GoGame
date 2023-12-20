@@ -1,10 +1,11 @@
 from PyQt6.QtWidgets import QMessageBox
 
 from confirmationWindow import Confirm
-from endGame import EndGame
+
 from piece import Piece
 from PyQt6.QtCore import QObject, pyqtSignal
 from score_board import ScoreBoard
+from endGame import EndGame
 
 
 def have_same_element(array1, array2):
@@ -36,8 +37,10 @@ class GameLogic(QObject):
     print("Game Logic Object Created")
     blackCapturedChanged = pyqtSignal(int)
     whiteCapturedChanged = pyqtSignal(int)
+
     def __init__(self, board):
         super().__init__()
+        self.end_game_dialog = None
         self.taille = 9
         self.plateau = board
         self.previous_boards = []
@@ -51,6 +54,7 @@ class GameLogic(QObject):
         self.scoreBoard = ScoreBoard()
 
     '''getters'''
+
     def getBlackCaptured(self):
         return self.blackCaptured
 
@@ -239,7 +243,6 @@ class GameLogic(QObject):
         self.scoreBoard.update_lbl_white_captured(self.blackCaptured)
         self.groups.remove(group)
 
-
     def simulate(self, row, column, color):
         """Suicide rules"""
         self.groups = []
@@ -324,14 +327,13 @@ class GameLogic(QObject):
 
     def next_player(self):
         self.current_player = 3 - self.current_player
-        if self.current_player % 2 == 0:
+        if self.current_player % 2== 0:
             print("Next piece: Black")
         else:
             print("Next piece: White")
 
-
     def calculate_score(self):
-        #self.countTerritory()
+        # self.countTerritory()
         # Calculate the final scores
         black_score = self.blackTerritory + self.blackCaptured
         white_score = self.whiteTerritory + self.whiteCaptured
@@ -352,7 +354,8 @@ class GameLogic(QObject):
                 print("White score :" + str(white_score))
 
                 # TODO : cacher le plateau
-                endWind = EndGame(black_score,white_score)
+                self.endWind = EndGame(black_score, white_score)
+                self.endWind.exec()
 
             else:
                 print("continue to play")
@@ -362,4 +365,5 @@ class GameLogic(QObject):
             print("White score :" + str(white_score))
 
             # TODO : cacher le plateau
-            endWind = EndGame(black_score, white_score)
+            self.end_game_dialog = EndGame(black_score, white_score)
+            self.end_game_dialog.exec()

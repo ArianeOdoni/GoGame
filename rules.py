@@ -129,7 +129,7 @@ class Rules(QDialog):
                               "  -> The player with the larger total of territory plus prisoners is the winner.")
             lbl_txt1.setWordWrap(True)
             lbl_pict = QLabel(self)
-            lbl_pict.setPixmap(QPixmap("./icon/pictRules.jpg"))
+            lbl_pict.setPixmap(QPixmap("./icon/picRules.jpg"))
             lbl_pict.setAlignment(Qt.AlignmentFlag.AlignCenter)
             '''lbl_txt2 = QLabel("Diagram 1 shows the position at "
                               "the end of a game on a 9 by 9 board, during which Black captured one white stone at "
@@ -166,7 +166,7 @@ class Rules(QDialog):
             content_layout.addWidget(lbl_txt1)
 
             lbl_pict = QLabel(self)
-            lbl_pict.setPixmap(QPixmap("./icon/pictLib1.jpg"))
+            lbl_pict.setPixmap(QPixmap("./icon/picLib1.jpg"))
             lbl_pict.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt2 = QLabel("This diagram shows three isolated white stones with their liberties, marked by "
@@ -179,7 +179,7 @@ class Rules(QDialog):
             lbl_txt2.setWordWrap(True)
 
             lbl_pict2 = QLabel(self)
-            lbl_pict2.setPixmap(QPixmap("./icon/pictLib2.jpg"))
+            lbl_pict2.setPixmap(QPixmap("./icon/picLib2.jpg"))
             lbl_pict2.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt3 = QLabel("This diagram shows the same three stones of first diagram each with only one liberty "
@@ -188,7 +188,7 @@ class Rules(QDialog):
             lbl_txt3.setWordWrap(True)
 
             lbl_pict3 = QLabel(self)
-            lbl_pict3.setPixmap(QPixmap("./icon/pictLib3.jpg"))
+            lbl_pict3.setPixmap(QPixmap("./icon/picLib3.jpg"))
             lbl_pict3.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt4 = QLabel("This diagram shows the position which would arise if "
@@ -219,7 +219,7 @@ class Rules(QDialog):
             lbl_txt1.setWordWrap(True)
 
             lbl_pict = QLabel(self)
-            lbl_pict.setPixmap(QPixmap("./icon/pictString1.jpg"))
+            lbl_pict.setPixmap(QPixmap("./icon/picString1.jpg"))
             lbl_pict.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt2 = QLabel("This diagram shows 2 solidly connected strings of stones,the two marked black stones "
@@ -236,7 +236,7 @@ class Rules(QDialog):
             lbl_txt3.setWordWrap(True)
 
             lbl_pict2 = QLabel(self)
-            lbl_pict2.setPixmap(QPixmap("./icon/pictString2.jpg"))
+            lbl_pict2.setPixmap(QPixmap("./icon/picString2.jpg"))
             lbl_pict2.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt4 = QLabel("In this diagram: the strings of thetop diagram have both been reduced to just one "
@@ -246,7 +246,7 @@ class Rules(QDialog):
             lbl_txt4.setWordWrap(True)
 
             lbl_pict3 = QLabel(self)
-            lbl_pict3.setPixmap(QPixmap("./icon/pictString3.jpg"))
+            lbl_pict3.setPixmap(QPixmap("./icon/picString3.jpg"))
             lbl_pict3.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt5 = QLabel("In the diagram we see the position which would result if:\n\t- Black captured at e and "
@@ -263,7 +263,7 @@ class Rules(QDialog):
             lbl_txt6.setWordWrap(True)
 
             lbl_pict4 = QLabel(self)
-            lbl_pict4.setPixmap(QPixmap("./icon/pictString4.jpg"))
+            lbl_pict4.setPixmap(QPixmap("./icon/picString4.jpg"))
             lbl_pict4.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt7 = QLabel("In this diagram, White may not play at i or j:"
@@ -272,7 +272,7 @@ class Rules(QDialog):
             lbl_txt7.setWordWrap(True)
 
             lbl_pict5 = QLabel(self)
-            lbl_pict5.setPixmap(QPixmap("./icon/pictString5.jpg"))
+            lbl_pict5.setPixmap(QPixmap("./icon/picString5.jpg"))
             lbl_pict5.setAlignment(Qt.AlignmentFlag.AlignCenter)
             lbl_txt8 = QLabel("In this diagram the outside liberties have been filled. \nThe plays at i and j become "
                               "legal: they fill the last black liberty in each case, "
@@ -319,7 +319,7 @@ class Rules(QDialog):
             lbl_txt1.setWordWrap(True)
 
             lbl_pict = QLabel(self)
-            lbl_pict.setPixmap(QPixmap("./icon/pictLife1.jpg"))
+            lbl_pict.setPixmap(QPixmap("./icon/picLife1.jpg"))
             lbl_pict.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt2 = QLabel("The black string here could only be captured if White were able to play at both m and n."
@@ -328,7 +328,7 @@ class Rules(QDialog):
             lbl_txt2.setWordWrap(True)
 
             lbl_pict2 = QLabel(self)
-            lbl_pict2.setPixmap(QPixmap("./icon/pictLife2.jpg"))
+            lbl_pict2.setPixmap(QPixmap("./icon/picLife2.png"))
             lbl_pict2.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt3 = QLabel("In this diagram, the black string at the bottom is in danger of being captured."
@@ -370,7 +370,7 @@ class Rules(QDialog):
             lbl_txt.setWordWrap(True)
 
             lbl_pict = QLabel(self)
-            lbl_pict.setPixmap(QPixmap("./icon/pictKO1.jpg"))
+            lbl_pict.setPixmap(QPixmap("./icon/picKO1.jpg"))
             lbl_pict.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt1 = QLabel("At the top of this diagram, Black can capture a stone by playing at r. "
@@ -385,7 +385,7 @@ class Rules(QDialog):
             lbl_txt1.setWordWrap(True)
 
             lbl_pict2 = QLabel(self)
-            lbl_pict2.setPixmap(QPixmap("./icon/pictKO2.jpg"))
+            lbl_pict2.setPixmap(QPixmap("./icon/picKO2.jpg"))
             lbl_pict2.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             lbl_txt2 = QLabel("In this case a play at u in this diagram, until White has made at least one play "
@@ -423,7 +423,7 @@ class Rules(QDialog):
             lbl_title.setStyleSheet("font-weight: bold;""font-size: 16px;")
 
             lbl_pict = QLabel(self)
-            lbl_pict.setPixmap(QPixmap("./icon/pictEnd1.jpg"))
+            lbl_pict.setPixmap(QPixmap("./icon/picEnd.jpg"))
             lbl_pict.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             # Ajouter du contenu au widget à l'intérieur de la zone de défilement

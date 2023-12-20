@@ -133,6 +133,14 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.translate(col * squareWidth + squareWidth, row * squareHeight + squareHeight)
                 painter.setBrush(QBrush(QColor(212, 177, 147)))  # Set brush color
                 painter.drawRect(0, 0, int(squareWidth), int(squareHeight))  # Draw rectangles
+
+
+                '''dots'''
+                if (row == 2 and col == 2) or (row == 2 and col == 6) or (row == 4 and col == 4) or (row == 6 and col == 2) or (
+                                        row == 6 and col == 6):
+                    painter.setBrush(QBrush(QColor(0, 0, 0)))  # dots in black
+                    corner_radius = 5  # Adjust the radius as needed
+                    painter.drawEllipse(QPointF(0, 0), corner_radius, corner_radius)
                 painter.restore()
 
     # original one

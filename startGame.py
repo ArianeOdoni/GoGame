@@ -12,6 +12,8 @@ class Start(QMainWindow):
         self.initUI()
 
     def initUI(self):
+
+        self.go_window = None
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
 
@@ -65,5 +67,4 @@ class Start(QMainWindow):
         self.hide()
         if not self.go_window:
             self.go_window = Go()
-
         self.go_window.show()
