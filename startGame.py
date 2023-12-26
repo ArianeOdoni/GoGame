@@ -67,9 +67,8 @@ class Start(QMainWindow):
 
     def launch(self):
         self.hide()
-        if not self.go_window:
-            self.go_window = Go()
-            self.go_window.homeButtonClicked.connect(self.showWind)
+        self.go_window = Go()
+        self.go_window.homeButtonClicked.connect(self.showWind)
         self.go_window.show()
 
     def showWind(self):
