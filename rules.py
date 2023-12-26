@@ -26,14 +26,14 @@ class Rules(QDialog):
 
         top_layout = QHBoxLayout()
         top_layout.addStretch()
-        passBtn = button('Return to the game', 'rgb(221,221,221)', 'rgb(0,0,0)')
+        passBtn = button('Return to the game', 'rgb(221,221,221)', 'rgb(0,0,0)', shortcut="H")
         passBtn.setFixedSize(150, 25)
         top_layout.addWidget(passBtn)
         main_layout.addLayout(top_layout)
 
         passBtn.clicked.connect(self.returnToGame)
 
-        self.stacked_widget = QStackedWidget(self)#store all the page at the same place
+        self.stacked_widget = QStackedWidget(self)
 
         self.pages = []
         for i in range(6):
@@ -43,30 +43,28 @@ class Rules(QDialog):
             self.stacked_widget.addWidget(page)
 
         main_layout.addWidget(self.stacked_widget)
+
         nav_layout = QHBoxLayout()
         main_layout.addLayout(nav_layout)
 
-        #create previous and next button
-        self.btn_previous = button('Previous', 'rgb(221,221,221)')
+        self.btn_previous = button('Previous', 'rgb(221,221,221)', shortcut="Left")
         self.btn_previous.clicked.connect(self.show_previous_page)
         nav_layout.addWidget(self.btn_previous)
 
-        self.btn_next = button('Next', "rgb(221,221,221)")
+        self.btn_next = button('Next', "rgb(221,221,221)", shortcut="Right")
         self.btn_next.clicked.connect(self.show_next_page)
         nav_layout.addWidget(self.btn_next)
 
-        # start to print the first page
         self.current_page_index = 0
         self.btn_previous.setVisible(False)
         self.stacked_widget.setCurrentIndex(self.current_page_index)
         self.show()
 
     def show_previous_page(self):
-        '''this method show the previous page of the rules'''
+        '''this method shows the previous page of the rules'''
+        self.btn_next.setText("Next")  #if we are on the last page we have to reset the text of nextBtn
 
-        self.btn_next.setText("Next") #if we are on the last page we have to reset the text of nextBtn
-
-        # print the previous page
+        # take the previous page
         self.current_page_index -= 1
         if self.current_page_index < 0:
             self.current_page_index = 0
@@ -75,38 +73,44 @@ class Rules(QDialog):
         self.stacked_widget.setCurrentIndex(self.current_page_index)
 
     def show_next_page(self):
-        '''this method show the next page of the rules'''
-
-        #if we are on the first page we set the previous button visible to be able return to previous page
+        '''This method shows the next page of the rules'''
         self.btn_previous.setVisible(True)
 
+        # take the next page
         self.current_page_index += 1
         if self.current_page_index >= len(self.pages):
             self.returnToGame()
             self.current_page_index = len(self.pages) - 1
         if self.current_page_index == len(self.pages)-1:
             self.btn_next.setText("Return to the game")
-            #last page: we xwant to go back to the game
+            # last page: we want to go back to the game
         self.stacked_widget.setCurrentIndex(self.current_page_index)
 
     def addText(self, page, i):
-        '''we add text to each page one by one'''
+        '''we add text and image to page i'''
         layout = QVBoxLayout(page)
 
         # create a scroll area to be able to see all the rules
         scroll_area = QScrollArea(self)
-        # Widget and a layout inside the scroll area to put the text
+        # We add widget and a layout inside the scroll area to put the text
         scroll_content = QWidget()
         scroll_area.setWidget(scroll_content)
         scroll_area.setWidgetResizable(True)
+
         content_layout = QVBoxLayout(scroll_content)
 
+        # set widget and layout for all the pages
         if i == 0:
-            #title
             lbl_title = QLabel("The rules:")
             lbl_title.setStyleSheet("font-weight: bold;""font-size: 16px;")
-
-            #text and example
+            '''lbl_txt1 = QLabel(
+                " A game of Go starts with an empty board. Each player has an effectively unlimited supply of pieces (called stones), "
+                "one taking the black stones, the other taking white. The main object of the game is to use your stones to form "
+                "territories by surrounding vacant areas of the board. It is also possible to capture your opponent's stones "
+                "by completely surrounding them. Players take turns, placing one of their stones on a vacant point at each turn,"
+                " with Black playing first. Note that stones are placed on the intersections of the lines rather than in the squares "
+                "and once played stones are not moved. However they may be captured, in which case they are removed from the board, and "
+                "kept by the capturing player as prisoners. ")'''
             lbl_txt1 = QLabel("\nA game of Go starts with an empty board.\n"
                               "\nEach player has an effectively unlimited supply of pieces, called stones:\n"
                               "\t- one taking the black stones (first player)\n"
@@ -124,10 +128,16 @@ class Rules(QDialog):
                               "\t- one point for each vacant point inside their own territory \n"
                               "\t- one point for every stone they have captured.\n "
                               "  -> The player with the larger total of territory plus prisoners is the winner.")
-            lbl_txt1.setWordWrap(True) #adjust text to fit with the window
+            lbl_txt1.setWordWrap(True)
             lbl_pict = QLabel(self)
             lbl_pict.setPixmap(QPixmap("./icon/picRules.jpg"))
             lbl_pict.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            '''lbl_txt2 = QLabel("Diagram 1 shows the position at "
+                              "the end of a game on a 9 by 9 board, during which Black captured one white stone at "
+                              "a.Black has surrounded 15 points of territory, 10 in the lower right corner and 5 "
+                              "towards the top of the board. Black's territory includes the point a formerly occupied "
+                              "by the white stone Black has captured. Adding this prisoner, Black has a total of 16 "
+                              "points.White's territory is 17 points, so White wins the game by one point")'''
             lbl_txt2 = QLabel("The diagram shows the position at the end of a game on a 9 by 9 board, during which "
                               "Black captured one white stone at a. \n"
                               "Black has surrounded 1 point for white stone captured and 15 points of territory\n"
@@ -144,10 +154,8 @@ class Rules(QDialog):
             content_layout.addWidget(lbl_txt2)
 
         if i == 1:
-            #title
             lbl_title = QLabel("Capturing stones and counting liberties:")
             lbl_title.setStyleSheet("font-weight: bold;""font-size: 16px;")
-            # Text and example
             lbl_txt1 = QLabel("Liberties:\n"
                               "\t - the empty points which are horizontally and vertically adjacent to a stone\n"
                               "\t- a solidly connected string of stones\n"
@@ -203,11 +211,8 @@ class Rules(QDialog):
             content_layout.addWidget(image_widget)
 
         if i == 2:
-            # title
             lbl_title = QLabel("Strings:")
             lbl_title.setStyleSheet("font-weight: bold;""font-size: 16px;")
-
-            # Text and example
             lbl_txt1 = QLabel("Solidly connected string is made of stones occupying adjacent points "
                               "(horizontally or vertically adjacent, no diagonals).")
             lbl_txt1.setWordWrap(True)
@@ -220,11 +225,10 @@ class Rules(QDialog):
                               "in the top left of th diagram are two separate strings, not a single one.")
             lbl_txt2.setWordWrap(True)
 
-            #title 2
+            # capturing strings
             lbl_title2 = QLabel("\nCapturing strings:")
             lbl_title2.setStyleSheet("font-weight: bold;""font-size: 16px;")
 
-            # text and example
             lbl_txt3 = QLabel("As far as capturing is concerned, a string of stones is treated as a single unit. As "
                               "with isolated stones, a string is captured when all of its liberties are occupied by "
                               "enemy stones")
@@ -250,10 +254,8 @@ class Rules(QDialog):
                               "have become white territory, and vice versa. ")
             lbl_txt5.setWordWrap(True)
 
-            #title 3
             lbl_title3 = QLabel("\nSelf-Capture:")
             lbl_title3.setStyleSheet("font-weight: bold;""font-size: 16px;")
-            #text and example
             lbl_txt6 = QLabel("A player may not self-capture, that is play a stone into a position where it would have "
                               "no liberties or form part of a string which would thereby have no liberties, unless, "
                               "as a result, one or more of the stones surrounding it is captured. ")
@@ -277,7 +279,6 @@ class Rules(QDialog):
                               "and removed from the board as White's prisoners.")
             lbl_txt8.setWordWrap(True)
 
-            #layout
             image_widget = QWidget()
             image_text_layout = QGridLayout(image_widget)
             image_text_layout.addWidget(lbl_pict2, 0, 0)
@@ -306,10 +307,8 @@ class Rules(QDialog):
             content_layout.addWidget(image_widget2)
 
         if i == 3:
-            #title
             lbl_title = QLabel("Life and death and the concept of eyes:")
             lbl_title.setStyleSheet("font-weight: bold;""font-size: 16px;")
-            # txt and example
             lbl_txt1 = QLabel("Any string or group of stones which has two or more eyes is permanently safe from "
                               "capture and is referred to as a live string or live group. "
                               "\nConversely, a string of stones which is unable to make two eyes, and is cut off and "
@@ -348,7 +347,6 @@ class Rules(QDialog):
                               "board and counted together with the capturing player's other prisoners.  ")
             lbl_txt4.setWordWrap(True)
 
-            #layout
             image_widget = QWidget()
             image_text_layout = QGridLayout(image_widget)
             image_text_layout.addWidget(lbl_pict, 0, 0)
@@ -362,11 +360,8 @@ class Rules(QDialog):
             content_layout.addWidget(lbl_txt4)
 
         if i == 4:
-            #title
             lbl_title = QLabel("The ko rule:")
             lbl_title.setStyleSheet("font-weight: bold;""font-size: 16px;")
-
-            # text and example
             lbl_txt = QLabel("The ko rule removes this possibility of indefinite repetition by forbidding the "
                              "recapture of the ko,")
             lbl_txt.setWordWrap(True)
@@ -398,10 +393,8 @@ class Rules(QDialog):
                               "\nthe corresponding plays at w and v in this diagram must also be delayed by one turn. ")
             lbl_txt2.setWordWrap(True)
 
-            # title 2
             lbl_title2 = QLabel("Seki:")
             lbl_title2.setStyleSheet("font-weight: bold;""font-size: 16px;")
-            # txt and example
             lbl_txt3 = QLabel(
                 "Usually a string which cannot make two eyes will die unless one of the surrounding enemy "
                 "strings also lacks two eyes. "
@@ -412,7 +405,6 @@ class Rules(QDialog):
                 "to make a capture. ")
             lbl_txt3.setWordWrap(True)
 
-            #layout
             content_layout.addWidget(lbl_title)
             content_layout.addWidget(lbl_txt)
             content_layout.addWidget(lbl_pict)
@@ -423,11 +415,9 @@ class Rules(QDialog):
             content_layout.addWidget(lbl_txt3)
 
         if i == 5:
-            #title
             lbl_title = QLabel("The end of the game:")
             lbl_title.setStyleSheet("font-weight: bold;""font-size: 16px;")
 
-            # text and example
             lbl_pict = QLabel(self)
             lbl_pict.setPixmap(QPixmap("./icon/picEnd.jpg"))
             lbl_pict.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -451,16 +441,15 @@ class Rules(QDialog):
             content_layout.addWidget(lbl_pict)
             content_layout.addWidget(lbl_txt)
 
-        #add the page created in the layout
         layout.addWidget(scroll_area)
         self.go_window = None
 
     def drawWoodGrainBackground(self, painter):
-        '''Set wood background '''
+        '''set wood background to the board'''
         # Load a wood texture image
         wood_texture = QPixmap("./icon/woods.jpg")
 
-        # Create a brush with the wood texture and put it in the painter
+        # Create a brush with the wood texture
         brush = QBrush(wood_texture)
         painter.fillRect(self.rect(), brush)
 
